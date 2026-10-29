@@ -1,0 +1,40 @@
+POST  {URL}/pokedex
+Body (JSON):
+
+{
+    "nome": "Squirtle",
+    "tipo": "Água",
+    "altura": 0.5,
+    "peso": 9.0,
+    "dataDaCaptura": "2025-08-15"
+}
+
+---------------------------------------------
+Outros para testar:
+
+{
+    "nome": "Eevee",
+    "tipo": "Normal",
+    "altura": 0.3,
+    "peso": 6.5,
+    "dataDaCaptura": "2025-09-01"
+}
+
+{
+    "nome": "Gengar",
+    "tipo": "Fantasma",
+    "altura": 1.5,
+    "peso": 40.5,
+    "dataDaCaptura": "2025-10-31"
+}
+
+---------------------------------------------
+JSON INVÁLIDO (para mostrar o Bean Validation -> 400 Bad Request):
+
+{
+    "nome": "",
+    "tipo": "Fogo",
+    "altura": -1,
+    "peso": 8.5,
+    "dataDaCaptura": "2099-01-01"
+}
