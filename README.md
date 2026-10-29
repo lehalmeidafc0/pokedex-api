@@ -44,7 +44,7 @@ pokedex/
     ├── java/br/com/fiap/
     │   ├── PokedexApplication.java -> método main
     │   ├── to/PokemonTO.java       -> Transfer Object (representa a tabela)
-    │   ├── dao/ConnectionFactory.java -> conexão com o Oracle
+    │   ├── dao/ConnectionFactory.java -> conexão com o Oracle (uma por requisição)
     │   ├── dao/PokemonDAO.java     -> SQL (findAll, findByCodigo, save, update, delete)
     │   ├── dao/CriadorDeTabela.java -> cria a tabela no Oracle se ela não existir
     │   ├── bo/PokemonBO.java       -> regras de negócio
@@ -71,6 +71,10 @@ pokedex/
 > Sobre a regra da data (A40): ela foi feita primeiro no `PokemonBO` e, a partir da A41, passou
 > para o Bean Validation (`@Past` no `PokemonTO`), igual ao professor fez com o `RemedioBO`.
 > O código antigo ficou comentado no BO para mostrar a evolução.
+
+> Sobre a `ConnectionFactory`: segue o mesmo modelo do professor (`getConnection()` e
+> `closeConnection()`), mas guarda a conexão em um `ThreadLocal`. Assim cada requisição usa a
+> sua própria conexão e, se duas chegarem ao mesmo tempo, uma não fecha a conexão da outra.
 
 ---
 
