@@ -16,6 +16,7 @@ Front-End e Deploy na nuvem (SnapDeploy).
 | POST   | `/pokedex`          | Cadastra um Pokémon         | 201 Created      | 400 Bad Request     |
 | PUT    | `/pokedex/{codigo}` | Atualiza um Pokémon         | 201 Created      | 400 Bad Request     |
 | DELETE | `/pokedex/{codigo}` | Exclui um Pokémon           | 204 No Content   | 404 Not Found       |
+| GET    | `/health`           | Health check do Deploy      | 200 OK           | -                   |
 
 Exemplo de JSON:
 
@@ -51,6 +52,7 @@ pokedex/
     │   └── resource/
     │       ├── PokemonResource.java   -> controller (endpoints)
     │       ├── CorsFilter.java        -> libera o acesso do Front-End
+    │       ├── HealthResource.java    -> GET /health (a plataforma usa para saber se a API está no ar)
     │       └── ValidacaoHandler.java  -> (extra) mensagens claras do Bean Validation
     └── resources/
         ├── application.properties
