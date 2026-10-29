@@ -45,7 +45,7 @@ pokedex/
     ├── java/br/com/fiap/
     │   ├── PokedexApplication.java -> método main
     │   ├── to/PokemonTO.java       -> Transfer Object (representa a tabela)
-    │   ├── dao/ConnectionFactory.java -> conexão com o Oracle (uma por requisição)
+    │   ├── dao/ConnectionFactory.java -> conexão com o Oracle (uma por vez, em fila)
     │   ├── dao/PokemonDAO.java     -> SQL (findAll, findByCodigo, save, update, delete)
     │   ├── dao/CriadorDeTabela.java -> cria a tabela no Oracle se ela não existir
     │   ├── bo/PokemonBO.java       -> regras de negócio
@@ -75,8 +75,10 @@ pokedex/
 > O código antigo ficou comentado no BO para mostrar a evolução.
 
 > Sobre a `ConnectionFactory`: segue o mesmo modelo do professor (`getConnection()` e
-> `closeConnection()`), mas guarda a conexão em um `ThreadLocal`. Assim cada requisição usa a
-> sua própria conexão e, se duas chegarem ao mesmo tempo, uma não fecha a conexão da outra.
+> `closeConnection()`). Como o Oracle da FIAP limita quantas sessões cada aluno abre ao mesmo
+> tempo (erro `ORA-02391`), ela usa **uma conexão por vez**: se duas requisições chegam juntas,
+> a segunda espera a primeira terminar (um `Semaphore` funciona como fila). Assim uma requisição
+> nunca fecha a conexão que outra está usando.
 
 ---
 
