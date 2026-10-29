@@ -5,10 +5,7 @@ import br.com.fiap.to.PokemonTO;
 
 import java.util.ArrayList;
 
-/**
- * Business Object: camada das regras de negócio.
- * O Resource chama o BO, e o BO decide se pode ou não chamar o DAO.
- */
+// Camada das regras de negócio: o Resource chama o BO e o BO chama o DAO.
 public class PokemonBO {
 
     private PokemonDAO pokemonDAO;
@@ -28,9 +25,8 @@ public class PokemonBO {
     public PokemonTO save(PokemonTO pokemon) {
         pokemonDAO = new PokemonDAO();
         // aqui se implementa a regra de negócios
-        // Na aula A40 validamos aqui que a data da captura deve estar no passado.
-        // A partir da aula A41 essa regra passou a ser feita pelo Bean Validation
-        // (anotação @Past em PokemonTO), por isso ficou comentada:
+        // na A40 essa validação da data da captura ficava aqui.
+        // na A41 passou para o Bean Validation (@Past no PokemonTO), então deixei comentada:
         // if (!pokemon.getDataDaCaptura().isBefore(LocalDate.now())) {
         //     return null;
         // }
