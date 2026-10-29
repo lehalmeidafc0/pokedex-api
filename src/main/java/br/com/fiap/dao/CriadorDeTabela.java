@@ -9,11 +9,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-/**
- * Roda uma vez quando a API sobe: se a tabela DDD_POKEMONS ainda não existir
- * no Oracle, ela é criada (com 3 Pokémons de exemplo).
- * Assim não é obrigatório rodar o script sql/criar_tabela.sql no SQL Developer.
- */
+// Roda uma vez quando a API sobe: se a tabela DDD_POKEMONS ainda não existir,
+// cria ela já com 3 Pokémons. Assim não precisa rodar o script no SQL Developer.
 @Component
 public class CriadorDeTabela implements ApplicationRunner {
 
@@ -55,7 +52,7 @@ public class CriadorDeTabela implements ApplicationRunner {
             System.out.println("Tabela DDD_POKEMONS criada com sucesso!");
 
         } catch (Exception e) {
-            // Não derruba a API: só avisa no console
+            // se der erro aqui, a API continua subindo, só avisa no console
             System.out.println("Não foi possível verificar/criar a tabela: " + e.getMessage());
         } finally {
             ConnectionFactory.closeConnection();
