@@ -8,13 +8,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-/**
- * Responsável por conversar com o banco de dados (tabela DDD_POKEMONS).
- * Aqui só tem SQL: regra de negócio fica no BO.
- */
+// Aqui fica só o acesso ao banco (tabela DDD_POKEMONS). Regra de negócio fica no BO.
 public class PokemonDAO {
 
-    // GET /pokedex -> lista todos os Pokémons (A41)
+    // lista todos os Pokémons (A41)
     public ArrayList<PokemonTO> findAll() {
         ArrayList<PokemonTO> pokemons = new ArrayList<PokemonTO>();
         String sql = "select * from ddd_pokemons order by codigo";
@@ -35,7 +32,7 @@ public class PokemonDAO {
         return pokemons;
     }
 
-    // GET /pokedex/{codigo} -> busca um Pokémon pela chave primária (A41)
+    // busca um Pokémon pelo código (A41)
     public PokemonTO findByCodigo(Long codigo) {
         PokemonTO pokemon = null;
         String sql = "select * from ddd_pokemons where codigo = ?";
@@ -55,11 +52,11 @@ public class PokemonDAO {
         return pokemon;
     }
 
-    // POST /pokedex -> cadastra um novo Pokémon (A40)
+    // cadastra um Pokémon novo (A40)
     public PokemonTO save(PokemonTO pokemon) {
         String sql = "insert into ddd_pokemons (nome, tipo, altura, peso, data_da_captura) values(?, ?, ?, ?, ?)";
-        // Pedimos ao Oracle para devolver o código gerado (identity),
-        // assim o JSON de resposta já volta com o "codigo" preenchido.
+        // o new String[]{"codigo"} pede para o Oracle devolver o código que ele gerou,
+        // assim a resposta do cadastro já volta com o código preenchido
         try (PreparedStatement ps = ConnectionFactory.getConnection().prepareStatement(sql, new String[]{"codigo"})) {
             ps.setString(1, pokemon.getNome());
             ps.setString(2, pokemon.getTipo());
@@ -83,7 +80,7 @@ public class PokemonDAO {
         return null;
     }
 
-    // DELETE /pokedex/{codigo} -> apaga um Pokémon (A42)
+    // apaga um Pokémon (A42)
     public boolean delete(Long codigo) {
         String sql = "delete from ddd_pokemons where codigo = ?";
         try (PreparedStatement ps = ConnectionFactory.getConnection().prepareStatement(sql)) {
@@ -97,7 +94,7 @@ public class PokemonDAO {
         return false;
     }
 
-    // PUT /pokedex/{codigo} -> atualiza um Pokémon existente (A43)
+    // atualiza um Pokémon que já existe (A43)
     public PokemonTO update(PokemonTO pokemon) {
         String sql = "update ddd_pokemons set nome=?, tipo=?, altura=?, peso=?, data_da_captura=? where codigo=?";
         try (PreparedStatement ps = ConnectionFactory.getConnection().prepareStatement(sql)) {
@@ -120,8 +117,8 @@ public class PokemonDAO {
         return null;
     }
 
-    // Converte a linha atual do ResultSet em um objeto PokemonTO
-    // (evita repetir o mesmo código no findAll e no findByCodigo)
+    // monta o PokemonTO a partir da linha do ResultSet
+    // (separei num método para não repetir o mesmo código no findAll e no findByCodigo)
     private PokemonTO montarPokemon(ResultSet rs) throws SQLException {
         PokemonTO pokemon = new PokemonTO();
         pokemon.setCodigo(rs.getLong("codigo"));
