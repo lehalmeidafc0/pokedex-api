@@ -16,17 +16,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-/**
- * Controller da API: recebe as requisições HTTP no endpoint /pokedex
- * e devolve as respostas em JSON com o código de status adequado.
- */
+// Controller da API: responde as requisições em /pokedex e devolve JSON com o status certo.
 @RestController
 @RequestMapping("/pokedex")
 public class PokemonResource {
 
     private PokemonBO pokemonBO = new PokemonBO();
 
-    // GET /pokedex -> 200 OK com a lista | 404 Not Found
+    // GET /pokedex: 200 com a lista ou 404
     @GetMapping
     public ResponseEntity<List<PokemonTO>> findAll() {
         List<PokemonTO> pokemons = pokemonBO.findAll();
@@ -37,7 +34,7 @@ public class PokemonResource {
         }
     }
 
-    // GET /pokedex/{codigo} -> 200 OK com o Pokémon | 404 Not Found
+    // GET /pokedex/{codigo}: 200 com o Pokémon ou 404
     @GetMapping("/{codigo}")
     public ResponseEntity<?> findByCodigo(@PathVariable Long codigo) {
         PokemonTO pokemon = pokemonBO.findByCodigo(codigo);
@@ -48,7 +45,7 @@ public class PokemonResource {
         }
     }
 
-    // POST /pokedex -> 201 Created | 400 Bad Request
+    // POST /pokedex: 201 ou 400
     @PostMapping
     public ResponseEntity<?> save(@RequestBody @Valid PokemonTO pokemon) {
         PokemonTO resultado = pokemonBO.save(pokemon);
@@ -59,7 +56,7 @@ public class PokemonResource {
         }
     }
 
-    // DELETE /pokedex/{codigo} -> 204 No Content | 404 Not Found
+    // DELETE /pokedex/{codigo}: 204 ou 404
     @DeleteMapping("/{codigo}")
     public ResponseEntity<String> delete(@PathVariable Long codigo) {
         if (pokemonBO.delete(codigo)) {
@@ -71,7 +68,7 @@ public class PokemonResource {
         }
     }
 
-    // PUT /pokedex/{codigo} -> 201 Created | 400 Bad Request
+    // PUT /pokedex/{codigo}: 201 ou 400
     @PutMapping("/{codigo}")
     public ResponseEntity<?> update(@PathVariable Long codigo,
                                     @RequestBody @Valid PokemonTO pokemon) {
