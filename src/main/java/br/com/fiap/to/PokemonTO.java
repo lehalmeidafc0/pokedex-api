@@ -8,10 +8,7 @@ import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
 
-/**
- * Representa um Pokémon da nossa Pokedex.
- * Cada atributo corresponde a uma coluna da tabela DDD_POKEMONS.
- */
+// Representa um Pokémon da Pokedex. Cada atributo é uma coluna da tabela DDD_POKEMONS.
 public class PokemonTO {
 
     private Long codigo;
@@ -32,7 +29,7 @@ public class PokemonTO {
     @Positive(message = "O peso deve ser maior que zero")
     private Double peso;
 
-    // Ninguém captura um Pokémon no futuro: a data precisa estar no passado
+    // não dá para capturar um Pokémon no futuro, então a data tem que ser no passado
     @NotNull(message = "A data da captura é obrigatória")
     @Past(message = "A data da captura deve ser uma data no passado")
     private LocalDate dataDaCaptura;
