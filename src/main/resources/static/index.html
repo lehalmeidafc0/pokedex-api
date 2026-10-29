@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokedex - API Restful</title>
+    <style>
+        :root {
+            --vermelho: #dc0a2d;
+            --vermelho-escuro: #a3071f;
+            --fundo: #f3f4f6;
+            --card: #ffffff;
+            --texto: #1f2937;
+            --suave: #6b7280;
+            --borda: #e5e7eb;
+            --ok: #16a34a;
+            --erro: #dc2626;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Roboto, Arial, sans-serif;
+            background: var(--fundo);
+            color: var(--texto);
+        }
+        header {
+            background: var(--vermelho);
+            color: #fff;
+            padding: 18px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            box-shadow: 0 3px 0 var(--vermelho-escuro);
+        }
+        .pokebola {
+            width: 38px; height: 38px; border-radius: 50%;
+            background: linear-gradient(#fff 0 0) center/100% 4px no-repeat, linear-gradient(var(--vermelho) 50%, #fff 50%);
+            border: 3px solid #222; position: relative; flex-shrink: 0;
+        }
+        .pokebola::after {
+            content: ""; position: absolute; inset: 0; margin: auto;
+            width: 12px; height: 12px; border-radius: 50%; background: #fff; border: 3px solid #222;
+        }
+        header h1 { margin: 0; font-size: 1.5rem; }
+        header small { opacity: .85; }
+        main { max-width: 1150px; margin: 0 auto; padding: 20px 16px 40px; display: grid; gap: 20px; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); }
+        main > * { min-width: 0; }
+        @media (max-width: 860px) { main { grid-template-columns: 1fr; } }
+        .painel { background: var(--card); border: 1px solid var(--borda); border-radius: 12px; padding: 18px; }
+        .painel h2 { margin: 0 0 12px; font-size: 1.1rem; }
+        label { display: block; font-size: .85rem; color: var(--suave); margin: 10px 0 4px; }
+        input, select {
+            width: 100%; padding: 9px 10px; border: 1px solid var(--borda); border-radius: 8px; font-size: .95rem;
+        }
+        input:focus { outline: 2px solid var(--vermelho); border-color: transparent; }
+        .linha { display: flex; gap: 8px; }
+        .linha > * { flex: 1; }
+        button {
+            border: 0; border-radius: 8px; padding: 10px 14px; font-weight: 600; cursor: pointer; font-size: .9rem;
+        }
+        .btn-principal { background: var(--vermelho); color: #fff; width: 100%; margin-top: 14px; }
+        .btn-principal:hover { background: var(--vermelho-escuro); }
+        .btn-sec { background: #e5e7eb; color: var(--texto); }
+        .btn-sec:hover { background: #d1d5db; }
+        .btn-perigo { background: #fee2e2; color: var(--erro); }
+        .btn-perigo:hover { background: #fecaca; }
+        .topo-lista { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; margin-bottom: 14px; }
+        .topo-lista h2 { margin: 0; flex: 1 1 100%; }
+        .topo-lista input { flex: 1; min-width: 140px; }
+        .grade { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+        .poke {
+            border: 1px solid var(--borda); border-radius: 12px; padding: 14px; background: #fff;
+            display: flex; flex-direction: column; gap: 6px;
+        }
+        .poke .num { color: var(--suave); font-size: .8rem; font-weight: 600; }
+        .poke h3 { margin: 0; font-size: 1.15rem; }
+        .tipo { align-self: flex-start; padding: 3px 10px; border-radius: 999px; font-size: .78rem; font-weight: 700; color: #fff; background: #6b7280; }
+        .dados { font-size: .85rem; color: var(--suave); line-height: 1.5; }
+        .acoes { display: flex; gap: 6px; margin-top: 6px; }
+        .acoes button { flex: 1; padding: 7px; }
+        .vazio { color: var(--suave); text-align: center; padding: 30px 0; }
+        #log {
+            font-family: Consolas, monospace; font-size: .8rem; background: #111827; color: #e5e7eb;
+            border-radius: 10px; padding: 12px; max-height: 190px; overflow: auto; margin: 0;
+            white-space: pre-wrap; word-break: break-all;
+        }
+        .s2 { color: #4ade80; } .s4, .s5 { color: #f87171; }
+        .editando { font-size: .8rem; color: var(--vermelho); font-weight: 600; min-height: 1em; }
+        .msg-erro { color: var(--erro); font-size: .85rem; margin-top: 10px; white-space: pre-line; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="pokebola"></div>
+    <div>
+        <h1>Pokedex</h1>
+        <small>Front-End consumindo a API Restful em Java (Spring Boot)</small>
+    </div>
+</header>
+
+<main>
+    <!-- Coluna da esquerda: configuração + formulário -->
+    <div style="display:grid; gap:20px; align-content:start;">
+        <section class="painel">
+            <h2>URL da API</h2>
+            <input id="apiUrl" placeholder="https://seu-servico.onrender.com">
+            <small style="color:var(--suave)">Ex.: http://localhost:8080 ou o link do Render</small>
+        </section>
+
+        <section class="painel">
+            <h2 id="tituloForm">Cadastrar Pokémon</h2>
+            <div class="editando" id="infoEdicao"></div>
+            <form id="form">
+                <label for="nome">Nome</label>
+                <input id="nome" placeholder="Pikachu">
+                <label for="tipo">Tipo</label>
+                <input id="tipo" list="tipos" placeholder="Elétrico">
+                <datalist id="tipos">
+                    <option>Normal</option><option>Fogo</option><option>Água</option><option>Planta</option>
+                    <option>Elétrico</option><option>Gelo</option><option>Lutador</option><option>Venenoso</option>
+                    <option>Terra</option><option>Voador</option><option>Psíquico</option><option>Inseto</option>
+                    <option>Pedra</option><option>Fantasma</option><option>Dragão</option><option>Fada</option>
+                </datalist>
+                <div class="linha">
+                    <div>
+                        <label for="altura">Altura (m)</label>
+                        <input id="altura" type="number" step="0.01" placeholder="0.4">
+                    </div>
+                    <div>
+                        <label for="peso">Peso (kg)</label>
+                        <input id="peso" type="number" step="0.01" placeholder="6.0">
+                    </div>
+                </div>
+                <label for="dataDaCaptura">Data da captura</label>
+                <input id="dataDaCaptura" type="date">
+                <button type="submit" class="btn-principal" id="btnSalvar">Cadastrar (POST)</button>
+                <button type="button" class="btn-sec" id="btnCancelar" style="width:100%; margin-top:8px; display:none">Cancelar edição</button>
+                <div class="msg-erro" id="erroForm"></div>
+            </form>
+        </section>
+
+        <section class="painel">
+            <h2>Requisições feitas</h2>
+            <pre id="log">Nenhuma requisição ainda.</pre>
+        </section>
+    </div>
+
+    <!-- Coluna da direita: lista -->
+    <section class="painel">
+        <div class="topo-lista">
+            <h2>Pokémons cadastrados</h2>
+            <input id="buscaCodigo" type="number" placeholder="Buscar por código">
+            <button class="btn-sec" id="btnBuscar">Buscar (GET /{codigo})</button>
+            <button class="btn-sec" id="btnTodos">Listar todos (GET)</button>
+        </div>
+        <div class="grade" id="lista"><div class="vazio">Carregando...</div></div>
+    </section>
+</main>
+
+<script>
+    // ---------- Configuração da URL da API ----------
+    const campoUrl = document.getElementById("apiUrl");
+    // Se a página está sendo servida pela própria API (localhost:8080 ou Render),
+    // usamos o mesmo endereço. Se abriu o arquivo direto no navegador, digite a URL.
+    let urlInicial = "http://localhost:8080";
+    if (location.protocol.startsWith("http")) urlInicial = location.origin;
+    try { urlInicial = localStorage.getItem("pokedexApiUrl") || urlInicial; } catch (e) {}
+    campoUrl.value = urlInicial;
+    campoUrl.addEventListener("change", () => {
+        try { localStorage.setItem("pokedexApiUrl", campoUrl.value.trim()); } catch (e) {}
+        listarTodos();
+    });
+
+    const endpoint = () => campoUrl.value.trim().replace(/\/+$/, "") + "/pokedex";
+
+    // ---------- Log das requisições (bom para a apresentação) ----------
+    const log = document.getElementById("log");
+    let primeiraLinha = true;
+    function registrar(metodo, url, status) {
+        if (primeiraLinha) { log.innerHTML = ""; primeiraLinha = false; }
+        const classe = "s" + String(status)[0];
+        const hora = new Date().toLocaleTimeString("pt-BR");
+        log.innerHTML = `<span>${hora}</span> ${metodo} ${url} → <span class="${classe}">${status}</span>\n` + log.innerHTML;
+    }
+
+    // Faz a requisição, registra no log e devolve {status, dados}
+    async function chamarApi(metodo, url, corpo) {
+        const opcoes = { method: metodo, headers: {} };
+        if (corpo) {
+            opcoes.headers["Content-Type"] = "application/json";
+            opcoes.body = JSON.stringify(corpo);
+        }
+        try {
+            const resposta = await fetch(url, opcoes);
+            registrar(metodo, url, resposta.status);
+            const texto = await resposta.text();
+            let dados = texto;
+            try { dados = JSON.parse(texto); } catch (e) {}
+            return { status: resposta.status, dados };
+        } catch (e) {
+            registrar(metodo, url, "ERRO");
+            alert("Não foi possível falar com a API.\nConfira a URL e se a API está no ar.\n(No Render gratuito, a primeira chamada pode levar ~1 minuto.)");
+            return { status: 0, dados: null };
+        }
+    }
+
+    // ---------- Cores por tipo ----------
+    const cores = {
+        normal: "#a8a77a", fogo: "#ee8130", agua: "#6390f0", planta: "#7ac74c", eletrico: "#e0b800",
+        gelo: "#96d9d6", lutador: "#c22e28", venenoso: "#a33ea1", terra: "#e2bf65", voador: "#a98ff3",
+        psiquico: "#f95587", inseto: "#a6b91a", pedra: "#b6a136", fantasma: "#735797", dragao: "#6f35fc",
+        fada: "#d685ad", aco: "#b7b7ce", sombrio: "#705746"
+    };
+    const semAcento = t => (t || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+    const escapar = t => String(t ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    const dataBr = d => d ? d.split("-").reverse().join("/") : "-";
+
+    // ---------- Listagem ----------
+    const lista = document.getElementById("lista");
+    function desenhar(pokemons) {
+        if (!pokemons || pokemons.length === 0) {
+            lista.innerHTML = '<div class="vazio">Nenhum Pokémon cadastrado ainda.</div>';
+            return;
+        }
+        lista.innerHTML = pokemons.map(p => `
+            <article class="poke">
+                <span class="num">#${String(p.codigo).padStart(3, "0")}</span>
+                <h3>${escapar(p.nome)}</h3>
+                <span class="tipo" style="background:${cores[semAcento(p.tipo)] || "#6b7280"}">${escapar(p.tipo)}</span>
+                <div class="dados">
+                    Altura: ${p.altura} m · Peso: ${p.peso} kg<br>
+                    Capturado em ${dataBr(p.dataDaCaptura)}
+                </div>
+                <div class="acoes">
+                    <button class="btn-sec" onclick="editar(${p.codigo})">Editar</button>
+                    <button class="btn-perigo" onclick="excluir(${p.codigo}, '${escapar(p.nome).replace(/'/g, "")}')">Excluir</button>
+                </div>
+            </article>`).join("");
+    }
+
+    async function listarTodos() {
+        const r = await chamarApi("GET", endpoint());
+        if (r.status === 200) desenhar(r.dados);
+        else if (r.status) lista.innerHTML = `<div class="vazio">A API respondeu ${r.status}.</div>`;
+    }
+
+    async function buscarPorCodigo() {
+        const codigo = document.getElementById("buscaCodigo").value;
+        if (!codigo) return listarTodos();
+        const r = await chamarApi("GET", `${endpoint()}/${codigo}`);
+        if (r.status === 200) desenhar([r.dados]);
+        else if (r.status === 404) lista.innerHTML = `<div class="vazio">Pokémon #${escapar(codigo)} não encontrado (404).</div>`;
+    }
+
+    // ---------- Cadastro / Atualização ----------
+    const form = document.getElementById("form");
+    const erroForm = document.getElementById("erroForm");
+    let codigoEmEdicao = null;
+
+    function lerFormulario() {
+        return {
+            nome: document.getElementById("nome").value.trim(),
+            tipo: document.getElementById("tipo").value.trim(),
+            altura: parseFloat(document.getElementById("altura").value),
+            peso: parseFloat(document.getElementById("peso").value),
+            dataDaCaptura: document.getElementById("dataDaCaptura").value || null
+        };
+    }
+
+    function limparFormulario() {
+        form.reset();
+        codigoEmEdicao = null;
+        erroForm.textContent = "";
+        document.getElementById("tituloForm").textContent = "Cadastrar Pokémon";
+        document.getElementById("infoEdicao").textContent = "";
+        document.getElementById("btnSalvar").textContent = "Cadastrar (POST)";
+        document.getElementById("btnCancelar").style.display = "none";
+    }
+
+    form.addEventListener("submit", async (ev) => {
+        ev.preventDefault();
+        erroForm.textContent = "";
+        const pokemon = lerFormulario();
+        const r = codigoEmEdicao
+            ? await chamarApi("PUT", `${endpoint()}/${codigoEmEdicao}`, pokemon)
+            : await chamarApi("POST", endpoint(), pokemon);
+
+        if (r.status === 201) {
+            limparFormulario();
+            listarTodos();
+        } else if (r.status === 400) {
+            // Mensagens do Bean Validation vindas da API
+            erroForm.textContent = typeof r.dados === "object" && r.dados
+                ? Object.values(r.dados).join("\n")
+                : (r.dados || "Dados inválidos.");
+        } else if (r.status) {
+            erroForm.textContent = `A API respondeu ${r.status}.`;
+        }
+    });
+
+    async function editar(codigo) {
+        const r = await chamarApi("GET", `${endpoint()}/${codigo}`);
+        if (r.status !== 200) return;
+        const p = r.dados;
+        codigoEmEdicao = codigo;
+        document.getElementById("nome").value = p.nome;
+        document.getElementById("tipo").value = p.tipo;
+        document.getElementById("altura").value = p.altura;
+        document.getElementById("peso").value = p.peso;
+        document.getElementById("dataDaCaptura").value = p.dataDaCaptura;
+        document.getElementById("tituloForm").textContent = "Atualizar Pokémon";
+        document.getElementById("infoEdicao").textContent = `Editando o Pokémon #${codigo}`;
+        document.getElementById("btnSalvar").textContent = "Atualizar (PUT)";
+        document.getElementById("btnCancelar").style.display = "block";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    async function excluir(codigo, nome) {
+        if (!confirm(`Excluir ${nome} (#${codigo})?`)) return;
+        const r = await chamarApi("DELETE", `${endpoint()}/${codigo}`);
+        if (r.status === 204) listarTodos();
+        else if (r.status === 404) alert("Pokémon não encontrado (404).");
+    }
+
+    document.getElementById("btnCancelar").addEventListener("click", limparFormulario);
+    document.getElementById("btnTodos").addEventListener("click", () => {
+        document.getElementById("buscaCodigo").value = "";
+        listarTodos();
+    });
+    document.getElementById("btnBuscar").addEventListener("click", buscarPorCodigo);
+
+    listarTodos();
+</script>
+</body>
+</html>
