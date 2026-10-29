@@ -161,8 +161,8 @@
 <script>
     // ---------- Configuração da URL da API ----------
     const campoUrl = document.getElementById("apiUrl");
-    // Se a página está sendo servida pela própria API (localhost:8080 ou Render),
-    // usamos o mesmo endereço. Se abriu o arquivo direto no navegador, digite a URL.
+    // se a página veio da própria API (localhost:8080 ou o link do deploy), usa o mesmo endereço.
+    // se abriu o arquivo direto no computador, é só digitar a URL da API no campo.
     let urlInicial = "http://localhost:8080";
     if (location.protocol.startsWith("http")) urlInicial = location.origin;
     try { urlInicial = localStorage.getItem("pokedexApiUrl") || urlInicial; } catch (e) {}
@@ -174,7 +174,7 @@
 
     const endpoint = () => campoUrl.value.trim().replace(/\/+$/, "") + "/pokedex";
 
-    // ---------- Log das requisições (bom para a apresentação) ----------
+    // ---------- Quadro de requisições feitas ----------
     const log = document.getElementById("log");
     let primeiraLinha = true;
     function registrar(metodo, url, status) {
@@ -184,7 +184,7 @@
         log.innerHTML = `<span>${hora}</span> ${metodo} ${url} → <span class="${classe}">${status}</span>\n` + log.innerHTML;
     }
 
-    // Faz a requisição, registra no log e devolve {status, dados}
+    // faz a requisição, mostra no quadro e devolve o status e os dados
     async function chamarApi(metodo, url, corpo) {
         const opcoes = { method: metodo, headers: {} };
         if (corpo) {
@@ -290,7 +290,7 @@
             limparFormulario();
             listarTodos();
         } else if (r.status === 400) {
-            // Mensagens do Bean Validation vindas da API
+            // mensagens do Bean Validation que a API devolveu
             erroForm.textContent = typeof r.dados === "object" && r.dados
                 ? Object.values(r.dados).join("\n")
                 : (r.dados || "Dados inválidos.");
