@@ -1,0 +1,10 @@
+PUT  {URL}/pokedex/1      (troque o 1 pelo código de um Pokémon já cadastrado)
+Body (JSON):
+
+{
+    "nome": "Raichu",
+    "tipo": "Elétrico",
+    "altura": 0.8,
+    "peso": 30.0,
+    "dataDaCaptura": "2025-03-10"
+}
