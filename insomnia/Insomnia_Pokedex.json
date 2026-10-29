@@ -1,0 +1,154 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2026-10-29T12:00:00.000Z",
+  "__export_source": "insomnia.desktop.app:v10",
+  "resources": [
+    {
+      "_id": "wrk_pokedex",
+      "_type": "workspace",
+      "parentId": null,
+      "name": "API Pokedex",
+      "description": "CRUD da Pokedex - DDD Using Java",
+      "scope": "collection"
+    },
+    {
+      "_id": "env_pokedex_base",
+      "_type": "environment",
+      "parentId": "wrk_pokedex",
+      "name": "Base Environment",
+      "data": {},
+      "metaSortKey": 0
+    },
+    {
+      "_id": "env_pokedex_local",
+      "_type": "environment",
+      "parentId": "env_pokedex_base",
+      "name": "Local",
+      "color": "#7d69cb",
+      "data": {
+        "base_url": "http://localhost:8080"
+      },
+      "metaSortKey": 1
+    },
+    {
+      "_id": "env_pokedex_render",
+      "_type": "environment",
+      "parentId": "env_pokedex_base",
+      "name": "Deploy (SnapDeploy)",
+      "color": "#dc0a2d",
+      "data": {
+        "base_url": "https://pokedex-rm569415-d0864.containers.snapdeploy.app"
+      },
+      "metaSortKey": 2
+    },
+    {
+      "_id": "req_pokedex_1",
+      "_type": "request",
+      "parentId": "wrk_pokedex",
+      "name": "findAll",
+      "method": "GET",
+      "url": "{{ _.base_url }}/pokedex",
+      "body": {},
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": -999,
+      "description": ""
+    },
+    {
+      "_id": "req_pokedex_2",
+      "_type": "request",
+      "parentId": "wrk_pokedex",
+      "name": "findByCodigo",
+      "method": "GET",
+      "url": "{{ _.base_url }}/pokedex/1",
+      "body": {},
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": -998,
+      "description": ""
+    },
+    {
+      "_id": "req_pokedex_3",
+      "_type": "request",
+      "parentId": "wrk_pokedex",
+      "name": "save",
+      "method": "POST",
+      "url": "{{ _.base_url }}/pokedex",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n    \"nome\": \"Squirtle\",\n    \"tipo\": \"Água\",\n    \"altura\": 0.5,\n    \"peso\": 9,\n    \"dataDaCaptura\": \"2025-08-15\"\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": -997,
+      "description": ""
+    },
+    {
+      "_id": "req_pokedex_4",
+      "_type": "request",
+      "parentId": "wrk_pokedex",
+      "name": "save (inválido - Bean Validation)",
+      "method": "POST",
+      "url": "{{ _.base_url }}/pokedex",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n    \"nome\": \"\",\n    \"tipo\": \"Fogo\",\n    \"altura\": -1,\n    \"peso\": 8.5,\n    \"dataDaCaptura\": \"2099-01-01\"\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": -996,
+      "description": ""
+    },
+    {
+      "_id": "req_pokedex_5",
+      "_type": "request",
+      "parentId": "wrk_pokedex",
+      "name": "update",
+      "method": "PUT",
+      "url": "{{ _.base_url }}/pokedex/1",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n    \"nome\": \"Raichu\",\n    \"tipo\": \"Elétrico\",\n    \"altura\": 0.8,\n    \"peso\": 30,\n    \"dataDaCaptura\": \"2025-03-10\"\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": -995,
+      "description": ""
+    },
+    {
+      "_id": "req_pokedex_6",
+      "_type": "request",
+      "parentId": "wrk_pokedex",
+      "name": "delete",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/pokedex/1",
+      "body": {},
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": -994,
+      "description": ""
+    }
+  ]
+}
