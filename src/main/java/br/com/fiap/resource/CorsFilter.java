@@ -9,10 +9,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-/**
- * Libera o CORS para que um Front-End rodando em outra origem
- * (outro domínio/porta) consiga consumir a nossa API.
- */
+// Libera o CORS para um Front-End que está em outro endereço conseguir usar a API.
 @Component
 public class CorsFilter extends OncePerRequestFilter {
     @Override
@@ -24,7 +21,7 @@ public class CorsFilter extends OncePerRequestFilter {
         response.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
         response.setHeader("Access-Control-Allow-Credentials", "true");
         response.setHeader("Access-Control-Max-Age", "3600");
-        // Requisição "preflight" do navegador: só respondemos OK
+        // o navegador manda um OPTIONS antes (preflight), aqui só responde OK
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             response.setStatus(HttpServletResponse.SC_OK);
             return;
