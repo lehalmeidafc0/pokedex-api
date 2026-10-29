@@ -1,24 +1,30 @@
-# Pokedex – API Restful com Spring Boot
+# Pokedex API
 
-Projeto do **Praticando** das aulas A39 a A46 (Domain Driven Design Using Java – Prof. Gilberto).
-É uma API de cadastro de Pokémons com o CRUD completo, banco Oracle, Bean Validation, CORS,
-Front-End e Deploy na nuvem (SnapDeploy).
+Esse é o projeto do **Praticando** das aulas A39 até A46 de Domain Driven Design Using Java (Prof. Gilberto).
 
-**API publicada:** <https://pokedex-rm569415-d0864.containers.snapdeploy.app/pokedex>  
-**Front-End:** <https://pokedex-rm569415-d0864.containers.snapdeploy.app>
+A ideia foi pegar tudo que a gente fez no projeto da MegaFarma e repetir com uma Pokedex: uma API em Java com Spring Boot que cadastra, lista, busca, atualiza e apaga Pokémons em um banco Oracle. Depois coloquei CORS, um Front-End simples e fiz o deploy para ela ficar no ar.
 
-**Endpoint:** `/pokedex`
+- **API no ar:** https://pokedex-rm569415-d0864.containers.snapdeploy.app/pokedex
+- **Front-End:** https://pokedex-rm569415-d0864.containers.snapdeploy.app
+- **Repositório:** https://github.com/lehalmeidafc0/pokedex-api
 
-| Verbo  | URI                 | O que faz                   | Sucesso          | Falha               |
-|--------|---------------------|-----------------------------|------------------|---------------------|
-| GET    | `/pokedex`          | Lista todos os Pokémons     | 200 OK           | 404 Not Found       |
-| GET    | `/pokedex/{codigo}` | Busca um Pokémon pelo código| 200 OK           | 404 Not Found       |
-| POST   | `/pokedex`          | Cadastra um Pokémon         | 201 Created      | 400 Bad Request     |
-| PUT    | `/pokedex/{codigo}` | Atualiza um Pokémon         | 201 Created      | 400 Bad Request     |
-| DELETE | `/pokedex/{codigo}` | Exclui um Pokémon           | 204 No Content   | 404 Not Found       |
-| GET    | `/health`           | Health check do Deploy      | 200 OK           | -                   |
+> O plano gratuito "dorme" depois de 15 minutos sem uso. Se a página demorar na primeira vez, é só esperar uns segundos que ela acorda.
 
-Exemplo de JSON:
+## Endpoints
+
+Todos ficam em `/pokedex`:
+
+| Verbo | Caminho | O que faz | Deu certo | Deu errado |
+|---|---|---|---|---|
+| GET | `/pokedex` | lista todos os Pokémons | 200 | 404 |
+| GET | `/pokedex/{codigo}` | busca um Pokémon pelo código | 200 | 404 |
+| POST | `/pokedex` | cadastra um Pokémon | 201 | 400 |
+| PUT | `/pokedex/{codigo}` | atualiza um Pokémon | 201 | 400 |
+| DELETE | `/pokedex/{codigo}` | apaga um Pokémon | 204 | 404 |
+
+Também tem um `GET /health`, que só responde "OK". A plataforma do deploy usa ele para saber se a API está viva.
+
+Exemplo de JSON para cadastrar:
 
 ```json
 {
@@ -30,160 +36,97 @@ Exemplo de JSON:
 }
 ```
 
----
+O `codigo` não precisa ser enviado, o próprio Oracle gera. A resposta do cadastro já volta com ele preenchido.
 
-## Estrutura do projeto
+## Como o projeto está organizado
 
-```
-pokedex/
-├── Dockerfile                      -> usado no Deploy (SnapDeploy)
-├── pom.xml                         -> dependências (Web, Validation, Oracle, DevTools)
-├── sql/criar_tabela.sql            -> script da tabela DDD_POKEMONS
-├── json-exemplos/                  -> JSONs de cadastro e atualização (.txt)
-├── insomnia/Insomnia_Pokedex.json  -> coleção pronta para importar no Insomnia
-└── src/main/
-    ├── java/br/com/fiap/
-    │   ├── PokedexApplication.java -> método main
-    │   ├── to/PokemonTO.java       -> Transfer Object (representa a tabela)
-    │   ├── dao/ConnectionFactory.java -> conexão com o Oracle (uma por vez, em fila)
-    │   ├── dao/PokemonDAO.java     -> SQL (findAll, findByCodigo, save, update, delete)
-    │   ├── dao/CriadorDeTabela.java -> cria a tabela no Oracle se ela não existir
-    │   ├── bo/PokemonBO.java       -> regras de negócio
-    │   └── resource/
-    │       ├── PokemonResource.java   -> controller (endpoints)
-    │       ├── CorsFilter.java        -> libera o acesso do Front-End
-    │       ├── HealthResource.java    -> GET /health (a plataforma usa para saber se a API está no ar)
-    │       └── ValidacaoHandler.java  -> (extra) mensagens claras do Bean Validation
-    └── resources/
-        ├── application.properties
-        └── static/index.html       -> Front-End da Pokedex
-```
+Segui a mesma divisão em pacotes que o professor usou:
 
-### O que foi feito em cada Praticando
+- **to** → `PokemonTO`: representa um Pokémon (é a "cara" da tabela). Aqui ficam as validações do Bean Validation.
+- **dao** → `PokemonDAO`: onde fica o SQL. `ConnectionFactory`: abre e fecha a conexão com o Oracle. `CriadorDeTabela`: cria a tabela sozinha se ela ainda não existir.
+- **bo** → `PokemonBO`: regras de negócio. É ele que chama o DAO.
+- **resource** → `PokemonResource`: os endpoints. `CorsFilter`: libera o acesso do Front-End. `ValidacaoHandler`: devolve mensagens de erro mais claras. `HealthResource`: o `/health`.
 
-| Aula | Praticando pedido | Onde está |
-|------|-------------------|-----------|
-| A39 | Pacotes, `PokemonTO`, `PokemonDAO`, `PokemonBO`, `PokemonResource` | pacotes `to`, `dao`, `bo`, `resource` |
-| A40 | Driver Oracle, `ConnectionFactory`, tabela, `save()` nas 3 camadas, validar data da captura no passado, POST no Insomnia | `pom.xml`, `ConnectionFactory`, `sql/`, `save()` |
-| A41 | `findAll()` buscando no banco, `findByCodigo()`, Bean Validation, GETs no Insomnia | `PokemonDAO`, `PokemonTO` (`@NotBlank`, `@Past`...) |
-| A42 | `delete()` nas 3 camadas, DELETE no Insomnia | `delete()` |
-| A43 | `update()` nas 3 camadas, PUT no Insomnia | `update()` |
-| A44 | `CorsFilter`, Build, Deploy, Front-End | `CorsFilter`, `Dockerfile`, `static/index.html` |
+Outros arquivos:
 
-> Sobre a regra da data (A40): ela foi feita primeiro no `PokemonBO` e, a partir da A41, passou
-> para o Bean Validation (`@Past` no `PokemonTO`), igual ao professor fez com o `RemedioBO`.
-> O código antigo ficou comentado no BO para mostrar a evolução.
+- `src/main/resources/static/index.html` → o Front-End
+- `sql/criar_tabela.sql` → script da tabela, caso queira criar na mão
+- `json-exemplos/` → os JSONs que usei para testar (a dica do professor de deixar num .txt)
+- `insomnia/Insomnia_Pokedex.json` → coleção do Insomnia pronta para importar
+- `Dockerfile` → usado no deploy
 
-> Sobre a `ConnectionFactory`: segue o mesmo modelo do professor (`getConnection()` e
-> `closeConnection()`). Como o Oracle da FIAP limita quantas sessões cada aluno abre ao mesmo
-> tempo (erro `ORA-02391`), ela usa **uma conexão por vez**: se duas requisições chegam juntas,
-> a segunda espera a primeira terminar (um `Semaphore` funciona como fila). Assim uma requisição
-> nunca fecha a conexão que outra está usando.
+## O que fiz em cada aula
 
----
+| Aula | O que o Praticando pedia | Onde está |
+|---|---|---|
+| A39 | criar os pacotes e as classes `PokemonTO`, `PokemonDAO`, `PokemonBO` e `PokemonResource` | pacotes `to`, `dao`, `bo` e `resource` |
+| A40 | driver do Oracle, `ConnectionFactory`, tabela, `save()` nas três camadas, validar que a data da captura está no passado, POST no Insomnia | `pom.xml`, `ConnectionFactory`, `sql/`, métodos `save()` |
+| A41 | `findAll()` buscando do banco, `findByCodigo()`, Bean Validation, GETs no Insomnia | `PokemonDAO` e `PokemonTO` |
+| A42 | `delete()` nas três camadas, DELETE no Insomnia | métodos `delete()` |
+| A43 | `update()` nas três camadas, PUT no Insomnia | métodos `update()` |
+| A44 | `CorsFilter`, build, deploy e um Front-End | `CorsFilter`, `Dockerfile` e `index.html` |
 
-## Passo 1 – Criar a tabela no Oracle
+Algumas coisas que vale explicar:
 
-**Não é obrigatório:** a classe `CriadorDeTabela` cria a tabela `DDD_POKEMONS` sozinha
-(com 3 Pokémons de exemplo) na primeira vez que a API sobe, se ela ainda não existir.
+- **Data da captura:** na A40 a validação ficava no `PokemonBO`. Na A41, igual o professor fez com o `RemedioBO`, ela passou para o Bean Validation (`@Past`). Deixei o código antigo comentado no BO para dar para ver a mudança.
+- **ConnectionFactory:** mantive o `getConnection()` e o `closeConnection()` do professor, mas tive que mudar uma coisa por dentro. Testando várias requisições ao mesmo tempo, algumas falhavam, porque uma fechava a conexão que a outra estava usando. E o Oracle da FIAP não deixa cada aluno abrir muitas conexões ao mesmo tempo (dá o erro `ORA-02391`). Então agora as requisições usam uma conexão por vez, numa fila: se duas chegam juntas, a segunda espera a primeira terminar.
+- **CriadorDeTabela:** quando a API sobe, ela confere se a tabela `DDD_POKEMONS` existe e, se não existir, cria com 3 Pokémons de exemplo. Assim não precisa abrir o SQL Developer.
 
-Se quiser criar na mão:
-1. Abra o **Oracle SQL Developer** e conecte no servidor da FIAP.
-2. Abra o arquivo `sql/criar_tabela.sql` e execute tudo (F5).
+## Rodando no IntelliJ
 
-## Passo 2 – Rodar a API no IntelliJ
-
-1. **File > Open** e escolha a pasta `pokedex`. Espere o Maven baixar as dependências.
-   (Se aparecer o ícone do Maven no canto superior direito, clique em **Sync Maven Changes**.)
-2. As credenciais do banco **não ficam no código**. Configure as variáveis de ambiente:
-   **Run > Edit Configurations... > PokedexApplication > Environment variables** e cole
-   (trocando pelo seu RM e senha):
+1. Abra a pasta `pokedex` no IntelliJ (File > Open) e espere o Maven baixar tudo. Se aparecer o ícone do Maven no canto de cima, clique em **Sync Maven Changes**.
+2. O usuário e a senha do banco não ficam no código, eles vêm de variáveis de ambiente. Vá em **Run > Edit Configurations > PokedexApplication > Environment variables** e coloque (com o seu RM e senha):
    ```
    DB_URL=jdbc:oracle:thin:@oracle.fiap.com.br:1521:ORCL;DB_USER=rmXXXXX;DB_PASSWORD=sua_senha
    ```
-3. Rode a classe `PokedexApplication`. No console deve aparecer `Tomcat started on port 8080`.
-4. Teste no navegador: <http://localhost:8080/pokedex> (JSON) e <http://localhost:8080> (Front-End).
+3. Rode a classe `PokedexApplication`. Quando aparecer `Tomcat started on port 8080` no console, está funcionando.
+4. Abra http://localhost:8080/pokedex para ver o JSON, ou http://localhost:8080 para ver o Front-End.
 
-## Passo 3 – Testar no Insomnia
+## Testando no Insomnia
 
-1. No Insomnia: **Import** (ou *Create > Import*) e escolha `insomnia/Insomnia_Pokedex.json`.
-2. Vai aparecer a coleção **API Pokedex** com as requisições:
-   `findAll`, `findByCodigo`, `save`, `save (inválido - Bean Validation)`, `update` e `delete`.
-3. No seletor de ambiente (canto superior esquerdo) escolha **Local** ou **Deploy (SnapDeploy)**.
-   O ambiente *Deploy* já aponta para `https://pokedex-rm569415-d0864.containers.snapdeploy.app`.
-4. Lembre de ajustar o código na URL (`/pokedex/1`) para um código que exista no seu banco.
+1. No Insomnia, clique em **Import** e escolha o arquivo `insomnia/Insomnia_Pokedex.json`.
+2. Vai aparecer a coleção **API Pokedex** com as requisições `findAll`, `findByCodigo`, `save`, `save (inválido - Bean Validation)`, `update` e `delete`.
+3. No canto de cima, escolha o ambiente: **Local** (para testar no IntelliJ) ou **Deploy (SnapDeploy)** (para testar a API no ar).
+4. Nas requisições que usam código (`/pokedex/1`), troque o número por um código que exista no banco.
 
-## Passo 4 – Build (gerar o .jar)
+## Build
 
-No terminal do IntelliJ, dentro da pasta do projeto:
+Para gerar o .jar, no terminal dentro da pasta do projeto:
 
 ```
 mvn clean -DskipTests package
 java -jar target/pokedex-0.0.1-SNAPSHOT.jar
 ```
 
-(Se o seu projeto tiver o `mvnw`, pode usar `./mvnw clean -DskipTests package` igual ao slide.
-Também dá para fazer pela aba **Maven > Lifecycle > package** do IntelliJ.)
-Para parar a aplicação: **Ctrl + C**. Para rodar o .jar, as variáveis de ambiente do banco
-também precisam estar definidas no terminal.
+Também dá para fazer pela aba **Maven > Lifecycle > package** do IntelliJ. Para parar, Ctrl + C.
 
-## Passo 5 – Subir para o GitHub
+## Deploy
 
-Crie um repositório novo no GitHub (ex.: `pokedex-api`) e, na pasta do projeto:
+Nos slides o professor usou o **Render**. Só que hoje o Render pede cartão de crédito para verificar contas novas, até no plano grátis. Por isso fiz o deploy no **SnapDeploy**, que é gratuito e não pede cartão. O processo é o mesmo da aula: o código vai para o GitHub, a plataforma usa o `Dockerfile` para montar a aplicação, e o usuário e a senha do banco ficam em variáveis de ambiente.
 
-```
-git init
-git add .
-git commit -m "first commit"
-git branch -M main
-git remote add origin https://github.com/SUA_CONTA/pokedex-api
-git push -u origin main
-```
+Passo a passo:
 
-## Passo 6 – Deploy
+1. Entrar em https://snapdeploy.dev com a conta do GitHub.
+2. Ir em **Containers > Deploy from GitHub** e escolher o repositório `pokedex-api`, branch `main`.
+3. Nome do container: `pokedex-rm569415`, tamanho **Small** (o gratuito) e, em Advanced Options, porta **8080**.
+4. Na janela de variáveis de ambiente, adicionar:
 
-O professor usou o **Render** nos slides (A44). Hoje o Render pede cartão de crédito para
-verificar contas novas, mesmo no plano gratuito, então o deploy foi feito no **SnapDeploy**,
-que tem plano gratuito sem cartão e usa o mesmo processo: **Dockerfile + variáveis de ambiente**.
+   | Variável | Valor |
+   |---|---|
+   | `DB_URL` | `jdbc:oracle:thin:@oracle.fiap.com.br:1521:ORCL` |
+   | `DB_USER` | seu RM |
+   | `DB_PASSWORD` | sua senha do Oracle |
 
-1. Entre em <https://snapdeploy.dev> com a conta do GitHub.
-2. **Containers > Deploy from GitHub** e escolha o repositório `pokedex-api` (branch `main`).
-3. Configure:
-   - **Container Name:** `pokedex-rm569415`
-   - **Container Size:** `Small` (gratuito)
-   - **Port (Advanced Options):** `8080`
-4. Na janela de variáveis de ambiente, adicione:
+5. Clicar em **Deploy** e esperar. Às vezes ele mostra "Failed" no começo e depois de 1 ou 2 minutos fica tudo certo, porque o Java demora um pouco para subir no plano grátis.
 
-   | Key           | Value                                              |
-   |---------------|----------------------------------------------------|
-   | `DB_URL`      | `jdbc:oracle:thin:@oracle.fiap.com.br:1521:ORCL`   |
-   | `DB_USER`     | seu RM (ex.: `rm569415`)                           |
-   | `DB_PASSWORD` | sua senha do Oracle                                |
+Sobre o `Dockerfile`: é a mesma ideia do slide (Java 21 da Eclipse Temurin), só que usei a imagem oficial do Maven, que já vem com esse Java. Ela compila o projeto e roda o .jar, então não depende do `mvnw` estar no repositório.
 
-5. Clique em **Deploy** e acompanhe o build. Quando o container ficar **Running**:
-   - <https://pokedex-rm569415-d0864.containers.snapdeploy.app/pokedex> → JSON com os Pokémons
-   - <https://pokedex-rm569415-d0864.containers.snapdeploy.app> → Front-End da Pokedex
-
-> **Dica:** no plano gratuito o container "dorme" depois de 15 minutos sem uso. A primeira
-> requisição pode demorar cerca de 1 minuto. Abra o link uns minutos **antes** de apresentar.
-
-> **Se quiser usar o Render (como no slide):** New > Web Service > Public Git Repository
-> (`https://github.com/lehalmeidafc0/pokedex-api`), Language `Docker`, plano `Free`, as mesmas
-> 3 variáveis de ambiente e **Deploy Web Service** (vai pedir um cartão para verificação).
-
-> **Sobre o Dockerfile:** é a mesma ideia do slide (Eclipse Temurin 21). Usamos a imagem oficial
-> do Maven, que já vem com o Java 21 (Temurin): ela compila o projeto e roda o .jar. Assim o
-> Deploy funciona mesmo que o arquivo `mvnw` não esteja no repositório.
-
----
+Se quiser fazer igual ao slide, no Render: New > Web Service > Public Git Repository, cola o link do repositório, escolhe Docker, plano Free, coloca as mesmas três variáveis e clica em Deploy Web Service (ele vai pedir o cartão).
 
 ## Front-End
 
-O arquivo `src/main/resources/static/index.html` é servido pela própria API, então ele abre
-direto no link do Deploy. Ele faz todas as requisições (GET, GET por código, POST, PUT, DELETE),
-mostra as mensagens do Bean Validation e tem um painel **Requisições feitas** com o verbo,
-a URL e o código de status de cada chamada — ótimo para mostrar na apresentação.
+O Front-End fica em `src/main/resources/static/index.html`. Como ele está dentro da API, abre direto no link do deploy. Dá para listar, buscar pelo código, cadastrar, editar e excluir. Quando os dados estão errados, ele mostra as mensagens do Bean Validation.
 
-Também dá para abrir o `index.html` direto do computador (duplo clique) e digitar a URL da API
-no campo **URL da API**. Nesse caso o Front está em outra origem, e quem permite a comunicação
-é o `CorsFilter`.
+Embaixo do formulário tem um quadrinho chamado **Requisições feitas**, que mostra cada requisição que o Front fez, com o verbo, a URL e o status que a API devolveu. Ajuda bastante para mostrar na apresentação o que está acontecendo por trás.
+
+Também dá para abrir o `index.html` direto do computador e colar o link da API no campo **URL da API**. Aí o Front está em outro endereço, e é o `CorsFilter` que deixa ele conversar com a API.
