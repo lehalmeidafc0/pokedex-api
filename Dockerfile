@@ -1,7 +1,6 @@
-# Dockerfile usado no Deploy para gerar e rodar a API.
-# Mesma ideia do slide (Eclipse Temurin 21): a imagem do Maven já vem com o
-# Java 21 (Temurin), então ela compila o projeto e também roda o .jar.
-# Assim não dependemos do arquivo mvnw estar no repositório.
+# Dockerfile usado no deploy.
+# É a mesma ideia do slide (Java 21 da Eclipse Temurin), mas usando a imagem do Maven,
+# que já vem com esse Java. Ela compila o projeto e roda o .jar, sem precisar do mvnw.
 
 FROM maven:3.9-eclipse-temurin-21
 
@@ -18,5 +17,5 @@ RUN mvn -B -DskipTests clean package
 
 EXPOSE 8080
 
-# Run the java app (limitando a memória e acelerando o início no plano gratuito)
+# Run the java app (as opções deixam o Java mais leve e mais rápido para subir no plano grátis)
 ENTRYPOINT ["java", "-XX:MaxRAMPercentage=70", "-XX:TieredStopAtLevel=1", "-XX:+UseSerialGC", "-jar", "target/pokedex-0.0.1-SNAPSHOT.jar"]
