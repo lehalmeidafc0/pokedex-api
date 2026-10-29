@@ -18,5 +18,5 @@ RUN mvn -B -DskipTests clean package
 
 EXPOSE 8080
 
-# Run the java app (limitando a memória do Java para caber no plano gratuito)
-ENTRYPOINT ["java", "-XX:MaxRAMPercentage=70", "-jar", "target/pokedex-0.0.1-SNAPSHOT.jar"]
+# Run the java app (limitando a memória e acelerando o início no plano gratuito)
+ENTRYPOINT ["java", "-XX:MaxRAMPercentage=70", "-XX:TieredStopAtLevel=1", "-XX:+UseSerialGC", "-jar", "target/pokedex-0.0.1-SNAPSHOT.jar"]
