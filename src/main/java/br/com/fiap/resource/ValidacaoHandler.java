@@ -9,11 +9,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/**
- * Extra (opcional): quando o Bean Validation barra um JSON inválido,
- * devolvemos 400 Bad Request com a mensagem de cada campo que deu erro,
- * em vez da resposta genérica do Spring. Ajuda muito no Insomnia e no Front.
- */
+// Extra: quando o Bean Validation barra o JSON, em vez da resposta padrão do Spring
+// devolve 400 com a mensagem de cada campo errado. Fica mais fácil de entender no Insomnia e no Front.
 @RestControllerAdvice
 public class ValidacaoHandler {
 
